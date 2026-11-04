@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gigdar: Fikir Board'u</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f3f3f1; --dot:#d4d4cf; --ink:#1d1d1f; --muted:#6b6b70;
+    --yellow:#ffe58a; --pink:#ffc1d0; --blue:#b3dcff; --green:#bdeeb0;
+    --orange:#ffcf98; --purple:#dccbff; --grey:#e7e7e3; --red:#ffb3a7;
+    --panel:#fff; --border:#e2e2de; --hover:#f6f6f4; --shadow:rgba(0,0,0,.06);
+  }
+  body.dark{
+    --bg:#16161a; --dot:#2e2e35; --ink:#ececf1; --muted:#9a9aa5;
+    --panel:#222228; --border:#33333b; --hover:#2c2c33; --shadow:rgba(0,0,0,.45);
+    --yellow:#e8cf6a; --pink:#e9a3b5; --blue:#8fbfe8; --green:#9fd393;
+    --orange:#e8b275; --purple:#b9a4ec; --grey:#b9b9b4; --red:#e8998c;
+  }
+  body.dark .sticky{color:#1d1d1f}
+  body.dark .sticky .del{color:rgba(0,0,0,.45)}
+  body, .frame, .pill{transition:background-color .2s, border-color .2s, color .2s}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+  #viewport{position:fixed;inset:0;cursor:grab;
+    background-image:radial-gradient(var(--dot) 1.2px, transparent 1.2px);background-size:24px 24px}
+  #viewport.panning{cursor:grabbing}
+  #canvas{position:absolute;left:0;top:0;transform-origin:0 0}
+  .frame{position:absolute;background:var(--panel);border-radius:14px;box-shadow:0 1px 2px var(--shadow),0 8px 24px var(--shadow);
+    border:1px solid var(--border);padding:0 18px 18px}
+  .frame-head{display:flex;align-items:center;gap:10px;padding:16px 0 12px;cursor:move;user-select:none}
+  .frame-head .tag{width:12px;height:12px;border-radius:3px;flex:none}
+  .frame-head h2{margin:0;font-size:18px;font-weight:800;letter-spacing:-.01em}
+  .frame-head .sub{font-size:12px;color:var(--muted);font-weight:500;margin-left:auto}
+  .notes{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;min-height:60px}
+  .sticky{position:relative;width:220px;min-height:120px;padding:14px 14px 16px;border-radius:4px;
+    box-shadow:0 1px 1px rgba(0,0,0,.08),0 4px 10px rgba(0,0,0,.08);font-size:13.5px;line-height:1.42;cursor:text}
+  .sticky:nth-child(3n+1){transform:rotate(-.6deg)} .sticky:nth-child(3n+2){transform:rotate(.5deg)}
+  .sticky b.t{display:block;font-size:14.5px;font-weight:700;margin-bottom:6px}
+  .sticky ul{margin:4px 0 0;padding-left:16px} .sticky li{margin:2px 0}
+  .sticky .k{display:inline-block;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+    background:rgba(0,0,0,.09);border-radius:4px;padding:2px 6px;margin-bottom:6px}
+  .sticky:focus{outline:2px solid #4b6bff;outline-offset:2px}
+  .sticky .del{position:absolute;top:4px;right:6px;border:0;background:none;font-size:16px;line-height:1;color:rgba(0,0,0,.35);
+    cursor:pointer;display:none;padding:2px 4px}
+  .sticky:hover .del{display:block}
+  .wide{width:300px}
+  .addhint{font-size:11.5px;color:var(--muted);margin-top:12px}
+  .c-yellow{background:var(--yellow)} .c-pink{background:var(--pink)} .c-blue{background:var(--blue)} .c-green{background:var(--green)}
+  .c-orange{background:var(--orange)} .c-purple{background:var(--purple)} .c-grey{background:var(--grey)} .c-red{background:var(--red)}
+
+  #toolbar{position:fixed;left:16px;top:16px;display:flex;gap:8px;align-items:center;z-index:10;flex-wrap:wrap;max-width:calc(100vw - 32px)}
+  .pill{background:var(--panel);color:var(--ink);border:1px solid var(--border);border-radius:10px;box-shadow:0 2px 8px var(--shadow);padding:8px 12px;font-size:13px}
+  .title-pill{font-weight:800;font-size:14px}
+  button.pill{cursor:pointer;font-family:inherit;font-weight:600}
+  button.pill:hover{background:var(--hover)}
+  #zoomlbl{min-width:54px;text-align:center;font-variant-numeric:tabular-nums}
+  #legend{position:fixed;right:16px;bottom:16px;z-index:10;font-size:12px;line-height:1.7}
+  #legend span{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+</style>
+</head>
+<body>
+<div id="toolbar">
+  <div class="pill title-pill">🤘 Gigdar</div>
+  <button class="pill" id="zout" title="Uzaklaş">−</button>
+  <div class="pill" id="zoomlbl">100%</div>
+  <button class="pill" id="zin" title="Yakınlaş">+</button>
+  <button class="pill" id="fit">Tümünü göster</button>
+  <button class="pill" id="reset" title="Sadece frame konumlarını sıfırlar, notlara dokunmaz">Konumları sıfırla</button>
+  <button class="pill" id="theme" title="Tema değiştir">🌙 Koyu mod</button>
+  <button class="pill" id="copychg" title="Tarayıcıda yaptığın değişiklikleri Claude Code'a yapıştırmak için kopyalar">📋 Değişikliklerimi kopyala</button>
+  <div class="pill" id="sync" title="Bu dosyada yaptığın değişiklikler sadece tarayıcında kalır. Kalıcı yapmak için Claude Code'a ver.">📁 Taslak: kalıcı değil</div>
+  <div class="pill" id="toast" style="display:none"></div>
+</div>
+<div id="legend" class="pill">
+  <div><span class="c-blue"></span>Rakip / pazar</div>
+  <div><span class="c-green"></span>Farklılaştırıcı</div>
+  <div><span class="c-red"></span>Risk / açık soru</div>
+  <div><span class="c-pink"></span>Claude önerisi</div>
+  <div><span class="c-yellow"></span>MVP özelliği</div>
+  <div><span class="c-orange"></span>v2 özelliği</div>
+  <div><span class="c-purple"></span>v3 özelliği</div>
+  <div><span class="c-grey"></span>Backlog / not</div>
+  <div style="color:var(--muted);margin-top:4px">Sürükle: kaydır · Tekerlek: zoom<br>Frame başlığını sürükle: taşı<br>Frame içine çift tıkla: yeni not</div>
+</div>
+
+<div id="viewport"><div id="canvas"></div></div>
+
+<script src="board-data.js"></script>
+<script>
+const FRAMES = window.BOARD_FRAMES || [];;
+
+const KEY="metal-board-repo-v1";
+let saved={}; try{saved=JSON.parse(localStorage.getItem(KEY)||"{}")}catch(e){saved={}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(saved))}catch(e){}}
+
+const canvas=document.getElementById("canvas"), vp=document.getElementById("viewport");
+let view={x:40,y:90,s:.6};
+function apply(){canvas.style.transform=`translate(${view.x}px,${view.y}px) scale(${view.s})`;
+  document.getElementById("zoomlbl").textContent=Math.round(view.s*100)+"%"}
+
+function stickyEl(n){
+  const d=document.createElement("div");d.className="sticky c-"+n.c;d.contentEditable="true";d.spellcheck=false;
+  d.innerHTML=n.h;
+  const x=document.createElement("button");x.className="del";x.textContent="×";x.contentEditable="false";x.title="Sil";
+  x.addEventListener("mousedown",e=>e.stopPropagation());
+  x.onclick=e=>{e.stopPropagation();const fr=d.closest(".frame");d.remove();saveNotes(fr)};
+  d.appendChild(x);
+  d.addEventListener("input",()=>saveNotes(d.closest(".frame")));
+  d.addEventListener("mousedown",e=>e.stopPropagation());
+  d.addEventListener("wheel",e=>{},{passive:true});
+  return d;
+}
+let remote={}; let db=null; const pushTimers={}, pushChains={};
+function fver(f){return f.ver||1}
+function stateFor(f){const r=remote[f.id]; if(r&&(r.ver||1)===fver(f)) return r;
+  const s=saved[f.id]; if(s&&(s.ver||1)===fver(f)) return s; return {};}
+function setSync(t){const el=document.getElementById("sync"); if(el) el.textContent=t;}
+function frameState(id){const f=FRAMES.find(x=>x.id===id); const st=Object.assign({},stateFor(f)); st.ver=fver(f); return st;}
+function schedulePush(id){
+  if(!db) return; setSync("☁ Kaydediliyor…");
+  clearTimeout(pushTimers[id]);
+  pushTimers[id]=setTimeout(()=>{
+    const st=frameState(id); const body={ver:st.ver,updatedAt:new Date().toISOString()};
+    if(st.notes) body.notes=st.notes; if(st.x!=null){body.x=st.x;body.y=st.y}
+    pushChains[id]=(pushChains[id]||Promise.resolve()).then(()=>db.doc("frames/"+id).set(body))
+      .then(()=>setSync("☁ Kaydedildi"),err=>{console.warn(err);setSync(err&&err.code==="invalid_argument"?"👁 Sadece görüntüleme":"⚠ Kaydedilemedi")});
+  },700);
+}
+function updateFrame(id,patch){const f=FRAMES.find(x=>x.id===id);
+  saved[id]=Object.assign({},stateFor(f),patch,{ver:fver(f)}); persist();
+  if(db){remote[id]=Object.assign({},saved[id]); schedulePush(id);} }
+function saveNotes(fr){
+  const arr=[...fr.querySelectorAll(".sticky")].map(s=>{const c=s.cloneNode(true);c.querySelector(".del")?.remove();
+    return {c:[...s.classList].find(k=>k.startsWith("c-")).slice(2),h:c.innerHTML}});
+  updateFrame(fr.dataset.id,{notes:arr});
+}
+
+function build(){
+  canvas.innerHTML="";
+  FRAMES.forEach(f=>{
+    const s=stateFor(f);
+    const fr=document.createElement("div");fr.className="frame";fr.dataset.id=f.id;fr.style.width=f.w+"px";
+    fr.innerHTML=`<div class="frame-head"><span class="tag" style="background:${f.color}"></span><h2>${f.title}</h2>${f.sub?`<span class="sub">${f.sub}</span>`:""}</div><div class="notes"></div><div class="addhint">Çift tıkla: yeni not</div>`;
+    const box=fr.querySelector(".notes");
+    (Array.isArray(s.notes)?s.notes:f.notes).forEach(n=>box.appendChild(stickyEl(n)));
+    fr.addEventListener("dblclick",e=>{if(e.target.closest(".sticky"))return;
+      const col=(f.notes[0]||{}).c||"yellow";const el=stickyEl({c:col,h:`<b class="t">Yeni not</b>Yaz...`});
+      box.appendChild(el);saveNotes(fr);el.focus()});
+    canvas.appendChild(fr);
+    const head=fr.querySelector(".frame-head");
+    head.addEventListener("mousedown",e=>{e.stopPropagation();dragging=true;const sx=e.clientX,sy=e.clientY,ox=parseFloat(fr.style.left),oy=parseFloat(fr.style.top);
+      const mv=ev=>{fr.style.left=ox+(ev.clientX-sx)/view.s+"px";fr.style.top=oy+(ev.clientY-sy)/view.s+"px"};
+      const up=()=>{removeEventListener("mousemove",mv);removeEventListener("mouseup",up);dragging=false;
+        const nx=parseFloat(fr.style.left),ny=parseFloat(fr.style.top); if(nx!==ox||ny!==oy) updateFrame(f.id,{x:nx,y:ny}); flushRebuild()};
+      addEventListener("mousemove",mv);addEventListener("mouseup",up)});
+  });
+  layout();
+}
+let dragging=false, pendingRebuild=false;
+function isEditing(){const a=document.activeElement;return !!(a&&a.isContentEditable)}
+function requestRebuild(){ if(isEditing()||dragging){pendingRebuild=true;return} build(); }
+function flushRebuild(){ if(pendingRebuild&&!isEditing()&&!dragging){pendingRebuild=false;build()} }
+document.addEventListener("focusout",()=>setTimeout(flushRebuild,50));
+
+function layout(){
+  const gap=40; let y=0;
+  const frs=FRAMES.map(f=>[f,canvas.querySelector(`[data-id="${f.id}"]`)]);
+  const rows=[...new Set(FRAMES.map(f=>f.row))].sort((a,b)=>a-b);
+  rows.forEach(r=>{let x=0,maxH=0;
+    frs.filter(([f])=>f.row===r).forEach(([f,el])=>{el.style.left=x+"px";el.style.top=y+"px";x+=f.w+gap;maxH=Math.max(maxH,el.offsetHeight)});
+    y+=maxH+80});
+  frs.forEach(([f,el])=>{const s=stateFor(f);if(s.x!=null){el.style.left=s.x+"px";el.style.top=s.y+"px"}});
+}
+
+async function initDb(){
+  if(!window.claude||!window.claude.use){setSync("📁 Taslak: kalıcı değil");return}
+  try{db=await window.claude.use("db")}catch(e){db=null}
+  if(!db){setSync("💾 Yerel mod");return}
+  setSync("☁ Bağlanıyor…");
+  let first=true;
+  const timer=setTimeout(()=>setSync("⚠ Bulut verisine ulaşılamadı"),10000);
+  db.collection("frames").onSnapshot(snap=>{
+    if(snap.metadata.hasPendingWrites) return;
+    let changed=false;
+    snap.docs.forEach(d=>{const data=d.data(); if(!data) return;
+      if(JSON.stringify(remote[d.id])!==JSON.stringify(data)){remote[d.id]=JSON.parse(JSON.stringify(data));changed=true}});
+    if(!snap.metadata.fromCache){clearTimeout(timer); setSync("☁ Kaydedildi");
+      if(first){first=false;
+        // migrate local-only edits up to the shared board
+        FRAMES.forEach(f=>{const r=remote[f.id], s=saved[f.id];
+          const remoteOk=r&&(r.ver||1)===fver(f), localOk=s&&(s.ver||1)===fver(f)&&(s.notes||s.x!=null);
+          if(!remoteOk&&localOk){remote[f.id]=Object.assign({},s);schedulePush(f.id);changed=true}});
+      }}
+    if(changed) requestRebuild();
+  },err=>{clearTimeout(timer);setSync("⚠ Bulut bağlantısı koptu");console.warn(err)});
+}
+
+function fit(){
+  let minX=1e9,minY=1e9,maxX=-1e9,maxY=-1e9;
+  canvas.querySelectorAll(".frame").forEach(el=>{const l=parseFloat(el.style.left),t=parseFloat(el.style.top);
+    minX=Math.min(minX,l);minY=Math.min(minY,t);maxX=Math.max(maxX,l+el.offsetWidth);maxY=Math.max(maxY,t+el.offsetHeight)});
+  const pad=40,top=70,W=innerWidth-pad*2,H=innerHeight-top-pad;
+  view.s=Math.min(W/(maxX-minX),H/(maxY-minY),1.2);
+  view.x=pad+(W-(maxX-minX)*view.s)/2-minX*view.s; view.y=top+(H-(maxY-minY)*view.s)/2-minY*view.s; apply();
+}
+function zoomAt(f,cx,cy){const ns=Math.min(2.5,Math.max(.15,view.s*f));
+  view.x=cx-(cx-view.x)*ns/view.s;view.y=cy-(cy-view.y)*ns/view.s;view.s=ns;apply()}
+
+vp.addEventListener("mousedown",e=>{if(e.target.closest(".sticky"))return;
+  if(document.activeElement && document.activeElement.isContentEditable) document.activeElement.blur();
+  const sx=e.clientX,sy=e.clientY,ox=view.x,oy=view.y;vp.classList.add("panning");
+  const mv=ev=>{view.x=ox+ev.clientX-sx;view.y=oy+ev.clientY-sy;apply()};
+  const up=()=>{vp.classList.remove("panning");removeEventListener("mousemove",mv);removeEventListener("mouseup",up)};
+  addEventListener("mousemove",mv);addEventListener("mouseup",up)});
+vp.addEventListener("wheel",e=>{e.preventDefault();
+  if(e.ctrlKey||e.metaKey||Math.abs(e.deltaY)>=50&&e.deltaX===0) zoomAt(Math.exp(-e.deltaY*0.0015),e.clientX,e.clientY);
+  else {view.x-=e.deltaX;view.y-=e.deltaY;apply()}},{passive:false});
+// touch: one finger pan, two finger pinch
+let tp=null;
+vp.addEventListener("touchstart",e=>{if(e.target.closest(".sticky")&&e.touches.length===1)return;
+  const t=[...e.touches].map(t=>({x:t.clientX,y:t.clientY}));tp={t,view:{...view}}},{passive:true});
+vp.addEventListener("touchmove",e=>{if(!tp)return;e.preventDefault();const t=[...e.touches].map(t=>({x:t.clientX,y:t.clientY}));
+  if(t.length===1&&tp.t.length===1){view.x=tp.view.x+t[0].x-tp.t[0].x;view.y=tp.view.y+t[0].y-tp.t[0].y;apply()}
+  else if(t.length===2&&tp.t.length===2){const d=(a)=>Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);
+    const cx=(tp.t[0].x+tp.t[1].x)/2,cy=(tp.t[0].y+tp.t[1].y)/2;view={...tp.view};zoomAt(d(t)/d(tp.t),cx,cy)}},{passive:false});
+vp.addEventListener("touchend",()=>{tp=null});
+
+document.getElementById("zin").onclick=()=>zoomAt(1.2,innerWidth/2,innerHeight/2);
+document.getElementById("zout").onclick=()=>zoomAt(1/1.2,innerWidth/2,innerHeight/2);
+document.getElementById("fit").onclick=fit;
+document.getElementById("reset").onclick=()=>{FRAMES.forEach(f=>{const st=stateFor(f);if(st.x!=null)updateFrame(f.id,{x:null,y:null})});build();fit()};
+
+function toast(t){const el=document.getElementById("toast");el.textContent=t;el.style.display="block";clearTimeout(toast._t);toast._t=setTimeout(()=>el.style.display="none",4000)}
+document.getElementById("copychg").onclick=async()=>{
+  const changed=FRAMES.filter(f=>{const s=saved[f.id];return s&&(s.ver||1)===(f.ver||1)&&Array.isArray(s.notes)});
+  if(!changed.length){toast("Henüz değişiklik yok");return}
+  const strip=h=>{const d=document.createElement("div");d.innerHTML=h;return d.innerText.replace(/\n{2,}/g,"\n").trim()};
+  const lines=changed.map(f=>"## "+f.title+" (id: "+f.id+")\n"+saved[f.id].notes.map(n=>"- ["+n.c+"] "+strip(n.h).replace(/\n/g," / ")).join("\n"));
+  const text="Board'da (docs/board) şu frame'leri tarayıcıda düzenledim. Bu son hâlleriyle docs/board/board-data.js dosyasını güncelle, değişen frame'lerin ver değerini 1 artır. Kararları etkileyen bir şey varsa mvp-spec.md ve decisions.md'yi de güncelle ve önce bana özetle:\n\n"+lines.join("\n\n");
+  try{await navigator.clipboard.writeText(text);toast("Kopyalandı: Claude Code'a yapıştır")}
+  catch(e){const ta=document.createElement("textarea");ta.value=text;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");toast("Kopyalandı: Claude Code'a yapıştır")}catch(_){toast("Kopyalanamadı")}ta.remove()}
+};
+const THEME_KEY="metal-board-theme";
+function setTheme(dark){document.body.classList.toggle("dark",dark);
+  document.getElementById("theme").textContent=dark?"☀️ Açık mod":"🌙 Koyu mod";
+  try{localStorage.setItem(THEME_KEY,dark?"dark":"light")}catch(e){}}
+let th=null;try{th=localStorage.getItem(THEME_KEY)}catch(e){}
+setTheme(th?th==="dark":(window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches));
+document.getElementById("theme").onclick=()=>setTheme(!document.body.classList.contains("dark"));
+
+build();
+initDb();
+(document.fonts?document.fonts.ready:Promise.resolve()).then(()=>{layout();fit()});
+apply();
+addEventListener("resize",()=>{});
+</script>
+</body>
