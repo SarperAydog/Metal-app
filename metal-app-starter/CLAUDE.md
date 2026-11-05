@@ -36,3 +36,4 @@ Full product context: `docs/product.md`. **Screen-by-screen MVP spec (source of 
 - Region map is a city "puzzle" drawn from our own shapes: no street base map, no tile service, no Google Maps, no GADM data.
 - Accounts are anonymous (Supabase anonymous sign-in) in the MVP; no email/password signup.
 - Never store secrets in the repo; use `.env` (gitignored) and Supabase secrets.
+- Never call JamBase except through `scripts/lib/jambase-client.mjs` or an equivalent guard: its plan bills extra calls instead of stopping. Hard limit is 900 calls per period.

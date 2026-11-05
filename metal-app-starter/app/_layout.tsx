@@ -1,8 +1,11 @@
 import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Button } from '@/components/Button';
+import { GenreForm } from '@/components/GenreForm';
+import { HomeCityScreen } from '@/components/HomeCityScreen';
 import { MessageScreen } from '@/components/MessageScreen';
 import { UsernameScreen } from '@/components/UsernameScreen';
 import { strings } from '@/constants/strings';
@@ -50,6 +53,14 @@ function Gate() {
       );
     case 'needs-username':
       return <UsernameScreen />;
+    case 'needs-city':
+      return <HomeCityScreen />;
+    case 'needs-genres':
+      return (
+        <SafeAreaView edges={['top']} style={styles.onboarding}>
+          <GenreForm hint={strings.genres.hint} title={strings.genres.title} />
+        </SafeAreaView>
+      );
     case 'ready':
       return (
         <Stack>
@@ -58,6 +69,8 @@ function Gate() {
             name="notifications"
             options={{ presentation: 'modal', title: strings.notifications.title }}
           />
+          <Stack.Screen name="edit-city" options={{ title: strings.city.editTitle }} />
+          <Stack.Screen name="edit-genres" options={{ title: strings.genres.editTitle }} />
         </Stack>
       );
   }
@@ -75,6 +88,7 @@ export default function RootLayout() {
 }
 
 const styles = StyleSheet.create({
+  onboarding: { flex: 1, backgroundColor: colors.background },
   loading: {
     flex: 1,
     alignItems: 'center',

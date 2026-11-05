@@ -15,6 +15,7 @@ Fill in `.env` (never committed). Supabase values are under Project Settings > A
 - `EXPO_PUBLIC_SUPABASE_URL`
 - `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 - `TICKETMASTER_API_KEY`
+- `JAMBASE_API_KEY` (data test only for now)
 
 In the Supabase dashboard:
 

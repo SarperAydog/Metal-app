@@ -26,6 +26,7 @@ Etiketler:
   6. Bildirim izni
 - [Karar] Profil sayfası: kullanıcı adı, ana şehir, **seçili şehirler listesi** (her satırda ana şehre mesafe + kaldır butonu; haritayla senkron), türler, takip edilen gruplar, ayarlar.
 - [Karar] Ayarlar'da **"Hesabımı sil"**, gizlilik politikası linki ve görünür iletişim e-postası bulunur. Yakın çevre testinde yalnızca "Hesabımı sil" olur; link ve e-posta domain ile birlikte, geniş testten önce eklenir.
+- [Karar] Ana şehir listeden elle seçilmez: kutuya harf yazdıkça öneriler çıkar. Nüfus sınırı yoktur: Wacken gibi küçük festival kasabaları da bulunur (Türkiye'de köyler hariç). Küçük yerlerde aynı adlıları ayırmak için yakındaki büyük şehir yazılır. Seçimler çok küçük kalırsa Sarper bölge seçimine geçmeyi değerlendirir.
 - [Karar] Kullanıcı adı MVP'de başkalarına görünmez ve benzersiz olması gerekmez.
 - [Karar] İlk deneme sürümü anonim hesapla, gerçek grup katılımı olmadan yapılır. Hedef, uygulamanın nasıl çalıştığını görmek.
 - Sonra (MVP dışı): "hesabını kalıcı yap" (e-posta / Apple / Google bağlama).
@@ -74,15 +75,17 @@ Etiketler:
 
 ## 3. Türler
 - [Karar] Ana tür ve alt tür olarak düzenlenmiş tür ağacı (ör. Black Metal > Atmospheric, Raw, Depressive...).
-- [Karar] Ana tür seçilince soru: **"Tüm alt türler eklensin mi, yoksa özelleştirmek ister misin?"** Özelleştir seçilirse alt türlerin tik listesi / dropdown'ı açılır.
-- [Karar] Seçilen türler ayrı bir alanda sürükle-bırak ile sıralanır (1 = en sevdiği).
+- [Karar] Ana tür seçilince soru sorulmaz: tüm alt türler dahil olur. Kartta "All subgenres" ve **"Change subgenres"** görünür; kullanıcı isterse oradan tik listesiyle daraltır. Alt tür sayısına sınır yoktur.
+- [Karar] Seçilen **ana türler** ayrı bir alanda sürükle-bırak ile sıralanır (1 = en sevdiği). Alt türler sıralanmaz.
 - [Karar] Kullanıcı bir grubu takip edince, grubun türlerinden takip etmedikleri varsa: **"Bu türü takip etmiyorsun, eklemek ister misin?"**
 - [Öneri] Sıra, etkinlik akışında ve ileride önerilerde ağırlık olarak kullanılır; bildirimleri etkilemez.
 - Teknik: tür ağacı küratörlükle oluşturulur; bir grup birden fazla alt türe bağlanabilir.
 - [Karar] Grup isimleri MusicBrainz'in serbest verisinden, tür bağlantıları Wikidata'dan gelir ve elle kontrol edilir. MusicBrainz tür etiketleri kullanılmaz (ticari olmayan lisans). Metal Archives ileride izinle dönebilir.
 - [Karar] Başlangıç: elle kontrol edilmiş yaklaşık 50 grup, test bölgesinde yaklaşan konserleri olanlardan seçilir.
 
-## 4. Gruplar
+## 4. Gruplar ve Festivaller
+- [Karar] **Festivallerin de grup sayfaları gibi kendi sayfaları olur.** Kullanıcı festivali bulur, sayfasına gider ve takip eder.
+- [Öneri] Festival sayfası: isim, yer, tarih, açıklanan lineup, bilet butonu, takip ve zil butonları. Yeni grup açıklanınca takip edene bildirim. Lineup'taki gruplar kendi sayfalarına bağlanır.
 - [Karar] Instagram benzeri arama: isimle grup ara, sayfasını bul, takip et.
 - [Karar] Grup sayfası: isim, ülke, alt türler, yaklaşan konserler, son duyurular, takip butonu, zil butonu.
 - [Karar] İki sayfa durumu, kullanıcı için net ayrılmalı:
@@ -145,6 +148,7 @@ Etiketler:
 - [Karar] API ve veri tarafı Claude'da.
 - Ticketmaster Discovery API + organizatör / grup girişi + haber kaynakları (RSS). Düzenli senkron; farklı kaynaklardan gelen aynı etkinliği birleştirme (dedupe).
 - [Karar] Kaynak katmanları: (1) Ticketmaster Discovery API, sonra Impact üzerinden affiliate. (2) Eventim: Awin affiliate + resmi etkinlik verisi (Almanya için sorulacak, henüz doğrulanmadı). (3) Kulüp düzeyi: yalnızca izin, resmi akış veya organizatör girişiyle. Her ülke için yerel bilet ortakları aranır.
+- [Karar] Almanya testi için JamBase ücretsiz planı kullanılır (Ticketmaster kulüp konserlerinin çoğunu göstermiyor, bkz. docs/data-test.md). Kalıcı kaynak Reservix ve Eventim yanıtlarından sonra seçilir. JamBase verisi gösterilen ekranda "Powered by JamBase" yazar; bilet linki değiştirilmez, affiliate kodu eklenemez. Aylık kota: 1.000; kendi sert limitimiz: 900.
 - [Karar] **Hiçbir site kazınmaz.** Metal Archives dahil.
 - [Karar] Test bölgesi: önce Almanya (Sarper Münih'te), sonra Türkiye. Sayım otomatik yapılır; Sarper yalnızca Münih'teki birkaç kulüple karşılaştırma yapar.
 - [Karar] Ticketmaster anahtarı hemen kullanılır, gerçek gruplarla çalışılır. Sonradan affiliate olmak aynı anahtara bağlanır.

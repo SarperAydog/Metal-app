@@ -1,13 +1,16 @@
+import { Link } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
 import { strings } from '@/constants/strings';
-import { colors, fontSize, radius, spacing } from '@/constants/theme';
+import { colors, fontSize, minTouchTarget, radius, spacing } from '@/constants/theme';
 import { useAuth } from '@/lib/auth';
+import { findCity, findGenre } from '@/lib/catalog';
 
 export default function ProfileScreen() {
-  const { username, deleteAccount } = useAuth();
+  const { username, homeCityId, genreSelections, deleteAccount } = useAuth();
+  const city = findCity(homeCityId);
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -26,6 +29,44 @@ export default function ProfileScreen() {
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.label}>{strings.profile.nameLabel}</Text>
       <Text style={styles.name}>{username}</Text>
+
+      <View style={styles.sectionRow}>
+        <Text accessibilityRole="header" style={styles.sectionTitle}>
+          {strings.profile.homeCity}
+        </Text>
+        <Link accessibilityLabel={`${strings.profile.change}: ${strings.profile.homeCity}`} href="/edit-city" style={styles.change}>
+          {strings.profile.change}
+        </Link>
+      </View>
+      <View style={styles.card}>
+        <Text style={styles.value}>
+          {city ? `${city.name}, ${strings.countries[city.country] ?? city.country}` : homeCityId}
+        </Text>
+      </View>
+
+      <View style={styles.sectionRow}>
+        <Text accessibilityRole="header" style={styles.sectionTitle}>
+          {strings.profile.genres}
+        </Text>
+        <Link accessibilityLabel={`${strings.profile.change}: ${strings.profile.genres}`} href="/edit-genres" style={styles.change}>
+          {strings.profile.change}
+        </Link>
+      </View>
+      <View style={styles.card}>
+        {genreSelections.map((selection, index) => (
+          <View key={selection.genreId} style={styles.genreRow}>
+            <Text style={styles.genreRank}>{index + 1}</Text>
+            <View style={styles.genreText}>
+              <Text style={styles.value}>{findGenre(selection.genreId)?.name ?? selection.genreId}</Text>
+              <Text style={styles.genreDetail}>
+                {selection.subgenreIds
+                  ? strings.genres.someSubgenres(selection.subgenreIds.length)
+                  : strings.genres.allSubgenres}
+              </Text>
+            </View>
+          </View>
+        ))}
+      </View>
 
       <Text accessibilityRole="header" style={styles.section}>
         {strings.profile.settings}
@@ -74,6 +115,26 @@ const styles = StyleSheet.create({
     marginTop: spacing.xl,
     marginBottom: spacing.sm,
   },
+  sectionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: spacing.lg,
+    marginBottom: spacing.xs,
+  },
+  sectionTitle: { color: colors.text, fontSize: fontSize.body, fontWeight: '700' },
+  change: {
+    color: colors.accent,
+    fontSize: fontSize.small,
+    fontWeight: '600',
+    paddingVertical: (minTouchTarget - fontSize.small - 4) / 2,
+    paddingLeft: spacing.lg,
+  },
+  value: { color: colors.text, fontSize: fontSize.body },
+  genreRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.xs },
+  genreRank: { color: colors.accent, fontSize: fontSize.body, fontWeight: '800', minWidth: 20 },
+  genreText: { flex: 1 },
+  genreDetail: { color: colors.textMuted, fontSize: fontSize.small },
   card: { backgroundColor: colors.surface, borderRadius: radius, padding: spacing.md },
   warning: { color: colors.text, fontSize: fontSize.body, lineHeight: 24 },
   error: { color: colors.danger, fontSize: fontSize.small, marginTop: spacing.sm },

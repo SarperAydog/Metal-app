@@ -13,7 +13,7 @@ Genel kural: arayüz olabildiğince okunur ve sade kalacak (Sarper'ın isteği).
 | 2. Ana şehir + türler | Tür ağacı, sıralama | Şehir seçimi, alt tür sorusu, sürükleyerek sıralama |
 | 3. Harita: seçim | Şehir parçaları, dokunma, onay | Seçim renkleri, onay butonu, km bilgisi, profil listesi. **Ek şehir seçiminde "paid feature" etiketi** |
 | 4. Harita: halka | Sürükleme jesti | Canlı km, birden fazla halka, doğru küçülme. "Paid feature" etiketi |
-| 5. Gruplar | Arama, sayfa, takip | Takipte, grubun türünü izlemiyorsan **"Bu türü eklemek ister misin?"** mesajı. Karşılama akışı tamam |
+| 5. Gruplar ve festivaller | Arama, sayfa, takip | Grup ve festival sayfaları. Takipte, grubun türünü izlemiyorsan **"Bu türü eklemek ister misin?"** mesajı. Karşılama akışı tamam |
 | 6. Etkinlikler | Veri hattı | Gerçek konserler, kart, filtreler, Gideceklerim, bilet butonu, Takvime ekle, Bildir |
 | 7. Bildirimler | Push ve zil | Test etkinliğinde telefona bildirim, zil ayarları |
 | 8. Gazete | Örnek özetlerle akış (otomasyon yok) | Etiketli haberler, kaynak adı, uygulama içinde açılan haber |
@@ -34,9 +34,14 @@ Her aşama önce bilgisayarda, sonra telefonda denenir. İki yol var:
 ## Hatırlatmalar
 
 ### Şimdi (Aşama 0)
-- [ ] Ticketmaster geliştirici anahtarı: Sarper kaydolup `.env` dosyasına yazacak.
-- [ ] Karşılaştırma için Münih'ten birkaç kulüp.
-- [ ] Eventim'e (Awin) sorulacak: Almanya için resmi etkinlik verisi var mı?
+- [x] Ticketmaster geliştirici anahtarı.
+- [x] Münih karşılaştırması (Backstage). Sonuç: `data-test.md`. Ticketmaster kulüp konserlerinin çoğunu göstermiyor.
+- [ ] Eventim ve Reservix e-postaları: Sarper uygulama adıyla bireysel e-posta adresi alınca gönderecek. Metinler `outreach-emails.md` dosyasında.
+- [x] JamBase ücretsiz planıyla Münih kapsamı ölçüldü: 13 konserin 11'i bulundu. Sonuç: `data-test.md`.
+- [ ] Etkinlik kaynağı kesinleşmeden: JamBase bağlantılarına kendi satış ortaklığı kodumuzu eklememize yazılı izin veriyor mu? (Şu anki kurallar yasaklıyor.)
+
+### Küçük iyileştirmeler
+- [ ] Sıralama listesinde sürüklerken arkadaki satırlar sekiyor ve görsel bir kusur oluşuyor (Sarper telefonda gördü, acil değil).
 
 ### Bildirimlerden önce (Aşama 7)
 - [ ] Android push için ücretsiz Firebase projesi.

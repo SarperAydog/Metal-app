@@ -254,7 +254,7 @@ window.BOARD_FRAMES = [
   },
   {
     "id": "m-tur",
-    "ver": 3,
+    "ver": 5,
     "title": "MVP · 3. Türler",
     "color": "#f5c400",
     "w": 520,
@@ -267,11 +267,11 @@ window.BOARD_FRAMES = [
       },
       {
         "c": "yellow",
-        "h": "<span class=\"k\">Karar</span><b class=\"t\">Ana tür seçilince</b>Soru: \"Tüm alt türler eklensin mi, yoksa özelleştirmek ister misin?\" Özelleştir derse alt türlerin tik listesi / dropdown'ı açılır."
+        "h": "<span class=\"k\">Karar</span><b class=\"t\">Ana tür seçilince</b>Soru sorulmaz, tüm alt türler dahil olur. Kartta \"Change subgenres\" görünür; isteyen oradan tik listesiyle daraltır."
       },
       {
         "c": "yellow",
-        "h": "<span class=\"k\">Ekran</span><b class=\"t\">Sıralama alanı</b>Seçilen türler sürükle-bırak ile sıralanır (1 = en sevdiğin). Akışta ağırlık olarak kullanılır."
+        "h": "<span class=\"k\">Ekran</span><b class=\"t\">Sıralama alanı</b>Seçilen ana türler sürükle-bırak ile sıralanır (1 = en sevdiğin). Alt türler sıralanmaz. Akışta ağırlık olarak kullanılır."
       },
       {
         "c": "yellow",
@@ -285,8 +285,8 @@ window.BOARD_FRAMES = [
   },
   {
     "id": "m-grup",
-    "ver": 3,
-    "title": "MVP · 4. Gruplar",
+    "ver": 4,
+    "title": "MVP · 4. Gruplar ve Festivaller",
     "color": "#f5c400",
     "w": 740,
     "row": 2,
@@ -295,6 +295,10 @@ window.BOARD_FRAMES = [
       {
         "c": "yellow",
         "h": "<span class=\"k\">Ekran</span><b class=\"t\">Arama</b>Instagram tarzı arama çubuğu. İsimle grup bul, sayfasına git, takip et."
+      },
+      {
+        "c": "yellow",
+        "h": "<span class=\"k\">Karar</span><b class=\"t\">Festival sayfaları</b>Festivallerin de grup sayfaları gibi kendi sayfaları olur: bulunur, açılır, takip edilir. İçerik önerisi: yer, tarih, lineup, bilet, yeni grup bildirimi."
       },
       {
         "c": "yellow",
